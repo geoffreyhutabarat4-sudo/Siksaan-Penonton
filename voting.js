@@ -512,5 +512,10 @@ class VotingManager {
       winner.apply(this.game);
       this.addChatMessage('STREAM_BOT', '#00ff88', `🏆 HASIL VOTING: [${winner.name}] terpilih dengan ${this.votes[winningIndex]} suara!`, '🎉');
     }
+
+    // RESUME GAMEPLAY STATE
+    this.game.state = 'PLAYING';
+    this.game.lastFrameTime = performance.now();
+    this.game.keys = {};
   }
 }
