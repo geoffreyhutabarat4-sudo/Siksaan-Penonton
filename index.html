@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Siksaan Penonton 🎮 — Streamer vs Chat Action Roguelike</title>
+  <meta name="description" content="Game 2D Action Roguelike interaktif bertema Streamer vs Chat. Bertahan hidup dari serangan musuh dan terima berkah atau siksaan kutukan dari voting penonton livestream!">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="app-container">
+
+    <!-- ── LEFT/CENTER: GAME VIEWPORT ────────────────────────── -->
+    <main id="game-section">
+
+      <!-- Top XP Progress Bar -->
+      <div id="xp-bar-container">
+        <div id="hud-xp-bar"></div>
+      </div>
+
+      <!-- Top Streamer Broadcast HUD -->
+      <header id="streamer-topbar">
+        <div class="topbar-left">
+          <div class="live-tag">🔴 LIVE</div>
+          <span class="stream-title">Siksaan Penonton #1</span>
+        </div>
+
+        <div class="topbar-center">
+          <!-- HP Bar -->
+          <div class="stat-box">
+            <span>❤️</span>
+            <div class="hp-bar-outer">
+              <div id="hud-hp-bar"></div>
+            </div>
+            <span id="hud-hp-txt">100 / 100</span>
+          </div>
+
+          <!-- Level Badge -->
+          <div class="stat-box">
+            <span>⭐</span>
+            <span id="hud-lvl-txt" class="stat-val">Lv. 1</span>
+          </div>
+
+          <!-- Survival Timer -->
+          <div class="stat-box">
+            <span>⏱️</span>
+            <span id="hud-timer-txt" class="stat-val">00:00</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Kills -->
+          <div class="stat-box">
+            <span>💀</span>
+            <span id="hud-kills-txt" class="stat-val">0 Kills</span>
+          </div>
+
+          <!-- Score -->
+          <div class="stat-box">
+            <span>🏆</span>
+            <span id="hud-score-txt" class="stat-val">0 Pts</span>
+          </div>
+
+          <!-- Sound Mute Toggle Button -->
+          <button id="btn-toggle-sound" class="btn-twitch" style="padding: 4px 10px; font-size: 11px;">🔊 Sound</button>
+        </div>
+      </header>
+
+      <!-- Boss Warning Banner (Visible on Boss Fight) -->
+      <div id="boss-hud" class="hidden">
+        <div class="boss-title">⚠️ TITAN TORMENTOR BOSS SPAWNED! ⚠️</div>
+        <div class="boss-hp-outer">
+          <div id="boss-hp-bar"></div>
+        </div>
+      </div>
+
+      <!-- Active Buffs and Curses Ribbon -->
+      <div id="active-buffs-list"></div>
+
+      <!-- Main Game Canvas Container -->
+      <div id="canvas-container">
+        <canvas id="game-canvas"></canvas>
+      </div>
+
+      <!-- ── AUDIENCE VOTING MODAL (15s Event) ───────────────── -->
+      <div id="voting-modal" class="hidden">
+        <div class="voting-header">
+          <div class="voting-tag">📢 CHAT VOTING ACTIVE</div>
+          <h2 class="voting-title">VOTING PENONTON: BERKAH ATAU SIKSAAN?!</h2>
+          <div class="voting-timer-badge">⏳ Waktu Memilih: <span id="vote-timer-txt">15s</span></div>
+        </div>
+
+        <div class="voting-cards-grid">
+          <!-- Vote Option 1 -->
+          <div id="vote-card-1" class="vote-card buff">
+            <div class="vote-card-top">
+              <span class="vote-card-icon">⚡</span>
+              <span class="vote-card-badge">BERKAH</span>
+            </div>
+            <h3 class="vote-card-title">Speed Demon</h3>
+            <p class="vote-card-desc">Kecepatan gerak meningkat +35% permanen!</p>
+            <div class="vote-card-footer">
+              <span class="vote-key-badge">[ 1 / !1 ]</span>
+              <div class="vote-bar-outer">
+                <div class="vote-bar-fill"></div>
+              </div>
+              <div class="vote-count-txt">0 suara (0%)</div>
+            </div>
+          </div>
+
+          <!-- Vote Option 2 -->
+          <div id="vote-card-2" class="vote-card curse">
+            <div class="vote-card-top">
+              <span class="vote-card-icon">🧈</span>
+              <span class="vote-card-badge">KUTUKAN</span>
+            </div>
+            <h3 class="vote-card-title">Butter Fingers</h3>
+            <p class="vote-card-desc">Senjata utama terjatuh di lantai! Berjalan ke sana untuk mengambilnya!</p>
+            <div class="vote-card-footer">
+              <span class="vote-key-badge">[ 2 / !2 ]</span>
+              <div class="vote-bar-outer">
+                <div class="vote-bar-fill"></div>
+              </div>
+              <div class="vote-count-txt">0 suara (0%)</div>
+            </div>
+          </div>
+
+          <!-- Vote Option 3 -->
+          <div id="vote-card-3" class="vote-card curse">
+            <div class="vote-card-top">
+              <span class="vote-card-icon">🌑</span>
+              <span class="vote-card-badge">KUTUKAN</span>
+            </div>
+            <h3 class="vote-card-title">Blind Faith</h3>
+            <p class="vote-card-desc">Layar menjadi gelap 75% (Fog of War) selama 25 detik!</p>
+            <div class="vote-card-footer">
+              <span class="vote-key-badge">[ 3 / !3 ]</span>
+              <div class="vote-bar-outer">
+                <div class="vote-bar-fill"></div>
+              </div>
+              <div class="vote-count-txt">0 suara (0%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── START OVERLAY ────────────────────────────────────── -->
+      <div id="start-overlay" class="overlay-screen">
+        <div class="screen-card">
+          <div class="screen-emoji">🎮</div>
+          <h1 class="screen-title">SIKSAAN PENONTON</h1>
+          <p class="screen-subtitle">Kamu adalah seorang streamer yang sedang live! Setiap naik level atau waktu 2 menit, penontonmu akan melakukan voting untuk memberimu Berkah penyelamat atau Kutukan yang menyiksa!</p>
+
+          <div class="controls-guide">
+            <div class="ctrl-row"><span>🎮</span> <span>Gerak: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau <kbd>Panah</kbd></span></div>
+            <div class="ctrl-row"><span>⚔️</span> <span>Senjata menembak otomatis ke musuh terdekat</span></div>
+            <div class="ctrl-row"><span>🗳️</span> <span>Voting: Ketik <kbd>!1</kbd>, <kbd>!2</kbd>, <kbd>!3</kbd> atau klik kartu</span></div>
+            <div class="ctrl-row"><span>📱</span> <span>Mobile: Sentuh dan geser layar (Virtual Joystick)</span></div>
+          </div>
+
+          <button id="btn-start-game" class="btn-primary">🔴 Mulai Live Stream & Bermain!</button>
+        </div>
+      </div>
+
+      <!-- ── GAME OVER OVERLAY ────────────────────────────────── -->
+      <div id="gameover-overlay" class="overlay-screen hidden">
+        <div class="screen-card">
+          <div class="screen-emoji">💀</div>
+          <h2 class="screen-title">STREAM ENDED!</h2>
+          <p class="screen-subtitle">Karaktermu gugur di tengah siksaan penonton livestream!</p>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Waktu Bertahan</span>
+              <span id="go-time" class="stat-value">00:00</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Level Maksimal</span>
+              <span id="go-level" class="stat-value">Lv. 1</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total Kills</span>
+              <span id="go-kills" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Skor Akhir</span>
+              <span id="go-score" class="stat-value">0</span>
+            </div>
+          </div>
+
+          <button id="btn-restart" class="btn-primary">🔄 Streaming Lagi (Restart)</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── RIGHT: LIVE TWITCH CHAT SIDEBAR ──────────────────── -->
+    <aside id="chat-sidebar">
+      <div class="chat-header">
+        <div class="chat-title">
+          <span>🟣</span> Live Stream Chat
+        </div>
+        <div class="viewer-count">👥 1.4K Penonton</div>
+      </div>
+
+      <!-- Stream Chat Stream Container -->
+      <div id="chat-messages">
+        <!-- Filled dynamically by AI simulation / Twitch WS -->
+      </div>
+
+      <!-- Twitch Real Channel Connector -->
+      <div class="twitch-connect-box">
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:6px;">Hubungkan Chat Twitch Asli (Opsional):</div>
+        <div class="twitch-form">
+          <input type="text" id="twitch-channel-input" class="twitch-input" placeholder="Nama channel twitch...">
+          <button id="btn-connect-twitch" class="btn-twitch">Connect</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Standalone Scripts -->
+  <script src="audio.js"></script>
+  <script src="voting.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
